@@ -1,0 +1,84 @@
+✅ Method 1: Docker দিয়ে (Recommended – সবচেয়ে সহজ)
+
+Ubuntu 22.04 এ Docker থাকলে এটা বেস্ট অপশন।
+
+🔹 Step 1: Docker Install (না থাকলে)
+sudo apt update
+sudo apt install docker.io -y
+sudo systemctl enable docker
+sudo systemctl start docker
+🔹 Step 2: Uptime Kuma Run করুন
+sudo docker run -d \
+  --restart=always \
+  -p 3001:3001 \
+  -v uptime-kuma:/app/data \
+  --name uptime-kuma \
+  louislam/uptime-kuma
+🔹 Browser এ যান
+http://SERVER-IP:3001
+
+Language select করুন → Admin username/password দিন → Done ✅
+
+✅ Method 2: Node.js দিয়ে Manual Install
+
+Docker না চাইলে এই পদ্ধতি ব্যবহার করুন।
+
+🔹 Step 1: System Update
+sudo apt update && sudo apt upgrade -y
+🔹 Step 2: Required Packages Install
+sudo apt install git curl -y
+🔹 Step 3: Node.js Install (Recommended LTS)
+curl -fsSL https://deb.nodesource.com/setup_lts.x | sudo -E bash -
+sudo apt install nodejs -y
+
+Check করুন:
+
+node -v
+npm -v
+🔹 Step 4: Uptime Kuma Clone করুন
+git clone https://github.com/louislam/uptime-kuma.git
+cd uptime-kuma
+🔹 Step 5: Setup এবং Run
+npm install
+node server/server.js
+
+Browser এ যান:
+
+http://SERVER-IP:3001
+✅ Systemd Service হিসেবে চালাতে চাইলে (Recommended for Production)
+🔹 Stop করুন (CTRL+C)
+🔹 Service User তৈরি করুন
+sudo useradd -r -m -U nodejs
+🔹 Move করুন
+sudo mv uptime-kuma /opt/
+sudo chown -R nodejs:nodejs /opt/uptime-kuma
+🔹 Service File তৈরি করুন
+sudo nano /etc/systemd/system/uptime-kuma.service
+
+Paste করুন:
+
+[Unit]
+Description=Uptime Kuma Monitoring Service
+After=network.target
+
+[Service]
+Type=simple
+User=nodejs
+Group=nodejs
+WorkingDirectory=/opt/uptime-kuma
+ExecStart=/usr/bin/node server/server.js
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
+
+Save করে বের হন।
+
+🔹 Enable & Start করুন
+sudo systemctl daemon-reload
+sudo systemctl enable uptime-kuma
+sudo systemctl start uptime-kuma
+🔹 Status Check
+sudo systemctl status uptime-kuma
+🎯 Access URL
+http://SERVER-IP:3001
